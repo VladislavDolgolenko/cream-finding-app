@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Аналитика косметики — makeup.com.ua</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+       background: #f4f6f9; color: #1a1a2e; font-size: 14px; }
+
+/* ── Header ── */
+header { background: linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);
+         color:#fff; padding:16px 24px; }
+header h1 { font-size:18px; font-weight:700; }
+header p  { font-size:11px; color:#8892b0; margin-top:3px; }
+
+/* ── Tabs ── */
+.tabs-nav { background:#fff; border-bottom:1px solid #e2e8f0;
+            padding:0 16px; display:flex; gap:2px; flex-wrap:wrap; overflow-x:auto; }
+.tab-btn  { background:none; border:none; border-bottom:3px solid transparent;
+            padding:10px 12px; cursor:pointer; font-size:13px; font-weight:500;
+            color:#64748b; white-space:nowrap; transition:color .15s,border-color .15s; }
+.tab-btn:hover { color:#3b82f6; }
+.tab-btn.active { color:#3b82f6; border-bottom-color:#3b82f6; }
+
+/* ── Toolbar ── */
+.toolbar { display:flex; gap:8px; flex-wrap:wrap; padding:10px 16px;
+           background:#fff; border-bottom:1px solid #f1f5f9; align-items:center; }
+.toolbar input, .toolbar select {
+  border:1px solid #e2e8f0; border-radius:6px; padding:6px 10px;
+  font-size:13px; color:#334155; background:#fff; outline:none; }
+.toolbar input:focus, .toolbar select:focus { border-color:#3b82f6; box-shadow:0 0 0 2px #bfdbfe; }
+#search { flex:1; min-width:180px; }
+.price-wrap { display:flex; align-items:center; gap:4px; font-size:12px; color:#94a3b8; }
+.price-wrap input { width:75px; }
+.badge { margin-left:auto; font-size:12px; color:#94a3b8; white-space:nowrap; }
+
+/* ── Hint ── */
+.hint { background:#eff6ff; border-left:3px solid #3b82f6; padding:7px 12px;
+        font-size:12px; color:#1d4ed8; margin:10px 16px 0; border-radius:0 6px 6px 0; }
+
+/* ── Hair types ── */
+.hairtypes { display:flex; gap:6px; flex-wrap:wrap; padding:10px 16px 0; }
+.hairtype-btn { background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px;
+                padding:5px 14px; cursor:pointer; font-size:13px; font-weight:500;
+                color:#64748b; transition:all .15s; }
+.hairtype-btn:hover  { background:#ede9fe; color:#7c3aed; border-color:#c4b5fd; }
+.hairtype-btn.active { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+
+/* ── Table ── */
+.table-wrap { overflow-x:auto; margin:10px 16px; border-radius:8px;
+              box-shadow:0 1px 4px rgba(0,0,0,.08); }
+table { width:100%; border-collapse:collapse; background:#fff; }
+thead tr { background:#f8fafc; }
+th { padding:9px 10px; text-align:left; font-size:11px; font-weight:600;
+     color:#94a3b8; text-transform:uppercase; letter-spacing:.4px;
+     border-bottom:2px solid #e2e8f0; white-space:nowrap;
+     cursor:pointer; user-select:none; }
+th:hover { color:#3b82f6; }
+th .sort-icon { margin-left:3px; opacity:.4; }
+th.sorted .sort-icon { opacity:1; color:#3b82f6; }
+td { padding:8px 10px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+tbody tr:hover { background:#f8fafc; }
+tbody tr:last-child td { border-bottom:none; }
+
+.col-num   { color:#94a3b8; font-size:12px; width:36px; }
+.col-brand { font-weight:600; color:#1e293b; white-space:nowrap;
+             max-width:130px; overflow:hidden; text-overflow:ellipsis; }
+.col-name  { color:#334155; max-width:250px; }
+.col-price { white-space:nowrap; color:#059669; font-weight:600; }
+.col-score { font-weight:700; text-align:center; border-radius:4px; white-space:nowrap; }
+.col-value { color:#7c3aed; font-weight:600; }
+.col-ings  { color:#475569; font-size:11px; max-width:270px; }
+.sh  { background:#d1fae5; color:#065f46; }
+.sm  { background:#fef3c7; color:#92400e; }
+.sl  { background:#fee2e2; color:#991b1b; }
+a.go { display:inline-block; background:#3b82f6; color:#fff; text-decoration:none;
+       padding:3px 9px; border-radius:4px; font-size:11px; font-weight:600; }
+a.go:hover { background:#2563eb; }
+
+/* ── Pagination ── */
+.pager { display:flex; gap:4px; align-items:center; justify-content:center;
+         padding:12px 16px; flex-wrap:wrap; }
+.pg-btn { background:#f1f5f9; border:1px solid #e2e8f0; border-radius:5px;
+          padding:5px 10px; cursor:pointer; font-size:12px; color:#64748b; min-width:32px; }
+.pg-btn:hover:not(:disabled) { background:#dbeafe; color:#1d4ed8; }
+.pg-btn.active { background:#3b82f6; color:#fff; border-color:#3b82f6; }
+.pg-btn:disabled { opacity:.35; cursor:default; }
+.pg-info { font-size:12px; color:#94a3b8; padding:0 8px; }
+
+.empty { text-align:center; padding:40px; color:#94a3b8; }
+.loading { text-align:center; padding:60px; color:#64748b; }
+
+@media(max-width:700px) {
+  .col-name { max-width:130px; }
+  .col-ings { display:none; }
+  .col-brand { max-width:90px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Аналитика косметики — makeup.com.ua</h1>
+  <p>Апрель 2026 · Скоринг по INCI-составу · Цена не влияет на score</p>
+</header>
+
+<div id="app"><div class="loading">Загрузка…</div></div>
+
+<!-- Preact + htm (React-совместимый, 3 KB, без сборки) -->
+<script type="module">
+import { h, render, Fragment } from 'https://esm.sh/preact@10';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'https://esm.sh/preact@10/hooks';
+import htm from 'https://esm.sh/htm@3';
+import Fuse from 'https://esm.sh/fuse.js@7';
+
+const html = htm.bind(h);
+const PAGE_SIZE = 50;
+
+// ─── Утилиты ──────────────────────────────────────────────────────────────────
+function scoreClass(s) { return s >= 100 ? 'sh' : s >= 60 ? 'sm' : 'sl'; }
+
+// ─── Компонент пагинации ──────────────────────────────────────────────────────
+function Pager({ page, total, onChange }) {
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (totalPages <= 1) return null;
+
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) pages.push(i);
+    else if (pages[pages.length - 1] !== '…') pages.push('…');
+  }
+  const start = (page - 1) * PAGE_SIZE + 1;
+  const end = Math.min(page * PAGE_SIZE, total);
+
+  return html`<div class="pager">
+    <button class="pg-btn" disabled=${page===1} onClick=${()=>onChange(page-1)}>‹</button>
+    ${pages.map(p => p === '…'
+      ? html`<span class="pg-info">…</span>`
+      : html`<button class="pg-btn ${p===page?'active':''}" onClick=${()=>onChange(p)}>${p}</button>`
+    )}
+    <button class="pg-btn" disabled=${page===totalPages} onClick=${()=>onChange(page+1)}>›</button>
+    <span class="pg-info">${start}–${end} из ${total.toLocaleString('ru')}</span>
+  </div>`;
+}
+
+// ─── Компонент таблицы ────────────────────────────────────────────────────────
+function DataTable({ rows, page, sortCol, sortDir, onSort }) {
+  const start = (page - 1) * PAGE_SIZE;
+  const pageRows = rows.slice(start, start + PAGE_SIZE);
+
+  const col = (key, label) => {
+    const active = sortCol === key;
+    const icon = active ? (sortDir === 'desc' ? '↓' : '↑') : '↕';
+    return html`<th class="${active?'sorted':''}" onClick=${()=>onSort(key)}>
+      ${label}<span class="sort-icon">${icon}</span>
+    </th>`;
+  };
+
+  return html`<div class="table-wrap"><table>
+    <thead><tr>
+      <th class="col-num">#</th>
+      ${col('b','Бренд')}
+      ${col('n','Название')}
+      ${col('p','Цена')}
+      ${col('s','Скор')}
+      ${col('v','Ценность')}
+      <th>Состав</th>
+      <th></th>
+    </tr></thead>
+    <tbody>
+      ${pageRows.length === 0
+        ? html`<tr><td colspan="8" class="empty">Ничего не найдено</td></tr>`
+        : pageRows.map((r, i) => html`<tr key=${r.id}>
+            <td class="col-num">${start + i + 1}</td>
+            <td class="col-brand" title=${r.b}>${r.b}</td>
+            <td class="col-name">${r.n}</td>
+            <td class="col-price">${r.p} ₴</td>
+            <td class="col-score ${scoreClass(r.s)}">${r.s}</td>
+            <td class="col-value">${r.v}</td>
+            <td class="col-ings">${r.i}</td>
+            <td><a class="go" href=${'https://makeup.com.ua/product/'+r.id+'/'} target="_blank">→</a></td>
+          </tr>`)
+      }
+    </tbody>
+  </table></div>`;
+}
+
+// ─── Главный компонент ────────────────────────────────────────────────────────
+function App() {
+  const [data,       setData]       = useState(null);
+  const [tab,        setTab]        = useState('face');
+  const [hairKey,    setHairKey]    = useState('dry');
+  const [search,     setSearch]     = useState('');
+  const [sortCol,    setSortCol]    = useState('v');
+  const [sortDir,    setSortDir]    = useState('desc');
+  const [minPrice,   setMinPrice]   = useState('');
+  const [maxPrice,   setMaxPrice]   = useState('');
+  const [page,       setPage]       = useState(1);
+
+  const searchRef = useRef();
+
+  // Загрузка данных
+  useEffect(() => {
+    fetch('data.json')
+      .then(r => r.json())
+      .then(d => { setData(d); })
+      .catch(e => console.error('Ошибка загрузки data.json:', e));
+  }, []);
+
+  // Сырые строки текущей вкладки
+  const rawRows = useMemo(() => {
+    if (!data) return [];
+    if (tab === 'shampoo') return data.shampoo[hairKey]?.rows || [];
+    return data.tabs.find(t => t.id === tab)?.rows || [];
+  }, [data, tab, hairKey]);
+
+  // Fuse-индекс пересчитывается только при смене вкладки
+  const fuse = useMemo(() => new Fuse(rawRows, {
+    keys: [{ name:'n', weight:2 }, { name:'b', weight:2 }, { name:'i', weight:1 }],
+    threshold: 0.35,
+    ignoreLocation: true,
+    minMatchCharLength: 2,
+  }), [rawRows]);
+
+  // Отфильтрованные + отсортированные строки
+  const filtered = useMemo(() => {
+    let rows = search.trim().length >= 2
+      ? fuse.search(search.trim()).map(r => r.item)
+      : rawRows;
+
+    const minP = parseFloat(minPrice) || 0;
+    const maxP = parseFloat(maxPrice) || Infinity;
+    if (minP > 0)         rows = rows.filter(r => r.p >= minP);
+    if (maxP < Infinity)  rows = rows.filter(r => r.p <= maxP);
+
+    return [...rows].sort((a, b) =>
+      sortDir === 'asc' ? a[sortCol] - b[sortCol] : b[sortCol] - a[sortCol]
+    );
+  }, [rawRows, fuse, search, minPrice, maxPrice, sortCol, sortDir]);
+
+  // При смене вкладки — сбрасываем страницу
+  const switchTab = useCallback((id) => { setTab(id); setPage(1); }, []);
+  const switchHair = useCallback((k) => { setHairKey(k); setPage(1); }, []);
+
+  const handleSort = useCallback((col) => {
+    if (col === sortCol) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
+    else { setSortCol(col); setSortDir('desc'); }
+    setPage(1);
+  }, [sortCol]);
+
+  const goPage = useCallback((p) => { setPage(p); window.scrollTo(0, 0); }, []);
+
+  if (!data) return html`<div class="loading">Загрузка данных…</div>`;
+
+  const hint = tab === 'shampoo'
+    ? data.shampoo[hairKey]?.hint
+    : data.tabs.find(t => t.id === tab)?.hint;
+
+  return html`<${Fragment}>
+    <!-- Навигация по вкладкам -->
+    <nav class="tabs-nav">
+      ${data.tabs.map(t => html`
+        <button class=${'tab-btn'+(tab===t.id?' active':'')} onClick=${()=>switchTab(t.id)}>
+          ${t.icon} ${t.label}
+        </button>`)}
+      <button class=${'tab-btn'+(tab==='shampoo'?' active':'')} onClick=${()=>switchTab('shampoo')}>
+        🧴 Шампуни
+      </button>
+    </nav>
+
+    <!-- Панель управления -->
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Поиск: название, бренд, состав…"
+        value=${search} onInput=${e => { setSearch(e.target.value); setPage(1); }} />
+
+      <select value=${sortCol} onChange=${e => { setSortCol(e.target.value); setPage(1); }}>
+        <option value="v">По ценности (score/цена)</option>
+        <option value="s">По качеству состава</option>
+        <option value="p">По цене</option>
+      </select>
+
+      <select value=${sortDir} onChange=${e => { setSortDir(e.target.value); setPage(1); }}>
+        <option value="desc">↓ убывание</option>
+        <option value="asc">↑ возрастание</option>
+      </select>
+
+      <div class="price-wrap">
+        от <input type="number" placeholder="0"   min="0" value=${minPrice}
+              onInput=${e => { setMinPrice(e.target.value); setPage(1); }} />
+        до <input type="number" placeholder="∞"   min="0" value=${maxPrice}
+              onInput=${e => { setMaxPrice(e.target.value); setPage(1); }} /> ₴
+      </div>
+
+      <span class="badge">${filtered.length.toLocaleString('ru')} позиций</span>
+    </div>
+
+    <!-- Подсказка -->
+    ${hint && html`<p class="hint">${hint}</p>`}
+
+    <!-- Кнопки типов волос (только для шампуней) -->
+    ${tab === 'shampoo' && html`
+      <div class="hairtypes">
+        ${Object.entries(data.shampoo).map(([key, prof]) => html`
+          <button class=${'hairtype-btn'+(hairKey===key?' active':'')}
+            onClick=${()=>switchHair(key)}>
+            ${prof.icon} ${prof.label}
+          </button>`)}
+      </div>`}
+
+    <!-- Таблица -->
+    <${DataTable}
+      rows=${filtered}
+      page=${page}
+      sortCol=${sortCol}
+      sortDir=${sortDir}
+      onSort=${handleSort}
+    />
+
+    <!-- Пагинация -->
+    <${Pager} page=${page} total=${filtered.length} onChange=${goPage} />
+  <//>`;
+}
+
+render(html`<${App}/>`, document.getElementById('app'));
+</script>
+</body>
+</html>
