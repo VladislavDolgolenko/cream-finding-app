@@ -72,6 +72,8 @@ tbody tr:last-child td { border-bottom:none; }
 .col-price { white-space:nowrap; color:#059669; font-weight:600; }
 .col-score { font-weight:700; text-align:center; border-radius:4px; white-space:nowrap; }
 .col-value { color:#7c3aed; font-weight:600; }
+.col-vol   { color:#0284c7; font-size:12px; white-space:nowrap; }
+.col-vv    { color:#9333ea; font-weight:700; }
 .col-ings  { color:#475569; font-size:11px; max-width:270px; }
 .sh  { background:#d1fae5; color:#065f46; }
 .sm  { background:#fef3c7; color:#92400e; }
@@ -132,6 +134,7 @@ a.go:hover { background:#2563eb; }
 .meta-chip.score-mid { background:#fef3c7; color:#92400e; }
 .meta-chip.score-lo  { background:#fee2e2; color:#991b1b; }
 .meta-chip.value  { background:#ede9fe; color:#5b21b6; }
+.meta-chip.vol    { background:#e0f2fe; color:#0369a1; }
 
 .modal-ings {
   padding:10px 20px; font-size:12px; color:#475569;
@@ -245,8 +248,10 @@ function Modal({ product, analogs, onClose }) {
         <!-- Метрики -->
         <div class="modal-meta">
           <span class="meta-chip price">${product.p} ₴</span>
+          ${product.vol ? html`<span class="meta-chip vol">${product.vol} мл</span>` : ''}
           <span class="meta-chip ${scoreChipClass(product.s)}">Скор: ${product.s}</span>
           <span class="meta-chip value">Ценность: ${product.v}</span>
+          ${product.vv != null ? html`<span class="meta-chip value">₴/мл: ${product.vv}</span>` : ''}
         </div>
 
         <!-- Ключевые ингредиенты -->
@@ -350,21 +355,25 @@ function DataTable({ rows, page, sortCol, sortDir, onSort, onRowClick }) {
       ${col('b','Бренд')}
       ${col('n','Название')}
       ${col('p','Цена')}
+      ${col('vol','Объём')}
       ${col('s','Скор')}
       ${col('v','Ценность')}
+      ${col('vv','₴/мл')}
       <th>Состав</th>
       <th></th>
     </tr></thead>
     <tbody>
       ${pageRows.length === 0
-        ? html`<tr><td colspan="8" class="empty">Ничего не найдено</td></tr>`
+        ? html`<tr><td colspan="10" class="empty">Ничего не найдено</td></tr>`
         : pageRows.map((r, i) => html`<tr key=${r.id} onClick=${()=>onRowClick(r)}>
             <td class="col-num">${start + i + 1}</td>
             <td class="col-brand" title=${r.b}>${r.b}</td>
             <td class="col-name">${r.n}</td>
             <td class="col-price">${r.p} ₴</td>
+            <td class="col-vol">${r.vol ? r.vol+' мл' : '—'}</td>
             <td class="col-score ${scoreClass(r.s)}">${r.s}</td>
             <td class="col-value">${r.v}</td>
+            <td class="col-vv">${r.vv != null ? r.vv : '—'}</td>
             <td class="col-ings">${r.i}</td>
             <td><a class="go"
                    href=${'https://makeup.com.ua/product/'+r.id+'/'}
@@ -456,8 +465,10 @@ function App() {
         value=${search} onInput=${e => { setSearch(e.target.value); setPage(1); }} />
       <select value=${sortCol} onChange=${e => { setSortCol(e.target.value); setPage(1); }}>
         <option value="v">По ценности (score/цена)</option>
+        <option value="vv">По ценности на мл (score×мл/₴)</option>
         <option value="s">По качеству состава</option>
         <option value="p">По цене</option>
+        <option value="vol">По объёму</option>
       </select>
       <select value=${sortDir} onChange=${e => { setSortDir(e.target.value); setPage(1); }}>
         <option value="desc">↓ убывание</option>
