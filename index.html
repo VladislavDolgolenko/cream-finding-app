@@ -276,6 +276,7 @@ function Modal({ product, analogs, onClose }) {
                     <th>Бренд</th>
                     <th>Название</th>
                     <th>Цена</th>
+                    <th>Объём</th>
                     <th>Сходство</th>
                     <th></th>
                   </tr></thead>
@@ -283,8 +284,9 @@ function Modal({ product, analogs, onClose }) {
                     ${productAnalogs.map((a, i) => html`<tr key=${a.id}>
                       <td style="color:#94a3b8;font-size:12px">${i+1}</td>
                       <td style="font-weight:600;color:#1e293b">${a.b}</td>
-                      <td style="color:#334155;max-width:240px">${a.n}</td>
+                      <td style="color:#334155;max-width:220px">${a.n}</td>
                       <td style="color:#059669;font-weight:600;white-space:nowrap">${a.p} ₴</td>
+                      <td style="color:#0284c7;white-space:nowrap">${a.vol ? a.vol+' мл' : '—'}</td>
                       <td>
                         <span class="sim-bar" style=${'width:'+Math.round(a.sim*0.6)+'px'}></span>
                         <strong>${a.sim}%</strong>
